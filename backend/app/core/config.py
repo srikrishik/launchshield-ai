@@ -1,6 +1,10 @@
 from functools import lru_cache
+from pathlib import Path
 
+from pydantic import AliasChoices, Field, SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+PROJECT_ROOT = Path(__file__).resolve().parents[3]
 
 
 class Settings(BaseSettings):
@@ -8,10 +12,17 @@ class Settings(BaseSettings):
     app_version: str = "0.1.0"
     environment: str = "development"
     debug: bool = False
+    database_url: SecretStr | None = Field(
+        default=None,
+        validation_alias=AliasChoices("DATABASE_URL", "LAUNCHSHIELD_DATABASE_URL"),
+    )
 
     model_config = SettingsConfigDict(
         env_prefix="LAUNCHSHIELD_",
         case_sensitive=False,
+        env_file=PROJECT_ROOT / ".env",
+        env_file_encoding="utf-8",
+        extra="ignore",
     )
 
 
